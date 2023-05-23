@@ -59,20 +59,21 @@ let pRow = 0
 let pCol = 0
 let pRot = 0
 
-function move() {
-  if (pRow < 0 || pRow > 9) {
-    throw Error("Row must be in the range 0-9")
-  }
-  if (pCol < 0 || pCol > 9) {
-    throw Error("Column must be in the range 0-9")
-  }
-  p.style.transform = `translateX(${pCol * 30}px) translateY(${pRow * 30}px) rotate(${pRot}deg)`
-}
+let stackSize = 0
 
-function moveTo(r, c) {
-  pRow = r
-  pCol = c
-  move()
+function move(pRow, pCol) {
+  console.log(stackSize)
+  stackSize += 1
+  window.setTimeout(() => {
+    if (pRow < 0 || pRow > 9) {
+      throw Error("Row must be in the range 0-9")
+    }
+    if (pCol < 0 || pCol > 9) {
+      throw Error("Column must be in the range 0-9")
+    }
+    p.style.transform = `translateX(${pCol * 30}px) translateY(${pRow * 30}px) rotate(${pRot}deg)`
+    stackSize -= 1
+  }, 300 * stackSize)
 }
 
 function turnR() {
@@ -106,11 +107,6 @@ function turnTo(cardinalPoint) {
   move()
 }
 
-pCol = 4
-pRow = 9
-turnTo("N")
-move()
-
 function walk(n) {
   // save original values
   const oldRow = pRow
@@ -118,6 +114,7 @@ function walk(n) {
 
   let dir = pRot
   while (dir < 0) dir += 360
+  dir %= 360
   // N: 270
   // E: 0
   // S: 90
@@ -137,7 +134,7 @@ function walk(n) {
       break
   }
   try {
-    move()
+    move(pRow, pCol)
   } catch (e) {
     console.log("Could not move due to error")
     console.log(e)
@@ -168,12 +165,28 @@ function evalStepByStep(lines) {
   }, 300)
 }
 
-const samplePlayerCode = `
-walk(3)
+const samplePlayerCodeSpiral = `
+turnTo("N")
+color("blue")
+steps = 1
+for (let i = 0; i < 10; i++) {
+for (let j = 0; j < steps; j++) {
+walk(1)
+color("blue")
+}
 turnR()
-write("O HAI")
+steps += 1
+if (steps > 9) {
+steps = 9;
+}
+}
 `
 
 function color(c) {
   m[pRow][pCol].style.backgroundColor = c
 }
+
+walk(1)
+walk(2)
+turnR()
+walk(3)
